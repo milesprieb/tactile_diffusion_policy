@@ -216,6 +216,7 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
 
                 # run rollout
                 if (self.epoch % cfg.training.rollout_every) == 0:
+                    print(f"Running rollout at epoch {self.epoch}")
                     runner_log = env_runner.run(policy)
                     # log all
                     step_log.update(runner_log)
@@ -248,6 +249,7 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
                         
                         result = policy.predict_action(obs_dict)
                         pred_action = result['action_pred']
+                        print(pred_action.shape) # testing action shape
                         mse = torch.nn.functional.mse_loss(pred_action, gt_action)
                         step_log['train_action_mse_error'] = mse.item()
                         del batch
@@ -259,6 +261,7 @@ class TrainDiffusionUnetImageWorkspace(BaseWorkspace):
                 
                 # checkpoint
                 if (self.epoch % cfg.training.checkpoint_every) == 0:
+                    print(f"Saving checkpoint at epoch {self.epoch}")
                     # checkpointing
                     if cfg.checkpoint.save_last_ckpt:
                         self.save_checkpoint()

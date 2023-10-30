@@ -44,6 +44,8 @@ from diffusion_policy.workspace.base_workspace import BaseWorkspace
 from diffusion_policy.policy.base_image_policy import BaseImagePolicy
 from diffusion_policy.common.cv2_util import get_image_transform
 
+import pygame
+
 
 OmegaConf.register_new_resolver("eval", eval, replace=True)
 
@@ -141,7 +143,7 @@ def main(input, output, robot_ip, match_dataset, match_episode,
     print("action_offset:", action_offset)
 
     with SharedMemoryManager() as shm_manager:
-        with Spacemouse(shm_manager=shm_manager) as sm, RealEnv(
+        with RealEnv(
             output_dir=output, 
             robot_ip=robot_ip, 
             frequency=frequency,
@@ -158,11 +160,20 @@ def main(input, output, robot_ip, match_dataset, match_episode,
             shm_manager=shm_manager) as env:
             cv2.setNumThreads(1)
 
+            pygame.init()
+            pygame.joystick.init()
+            joystick_count = pygame.joystick.get_count()
+            if joystick_count == 0:
+                print("No joystick found.")
+                return
+            joystick = pygame.joystick.Joystick(0)
+            joystick.init()
+
             # Should be the same as demo
             # realsense exposure
-            env.realsense.set_exposure(exposure=120, gain=0)
+            env.realsense.set_exposure(exposure=14500.0, gain=16.0)
             # realsense white balance
-            env.realsense.set_white_balance(white_balance=5900)
+            env.realsense.set_white_balance(white_balance=3790)
 
             print("Waiting for realsense")
             time.sleep(1.0)
@@ -177,7 +188,7 @@ def main(input, output, robot_ip, match_dataset, match_episode,
                     lambda x: torch.from_numpy(x).unsqueeze(0).to(device))
                 result = policy.predict_action(obs_dict)
                 action = result['action'][0].detach().to('cpu').numpy()
-                assert action.shape[-1] == 2
+                assert action.shape[-1] == 6
                 del result
 
             print('Ready!')
@@ -237,26 +248,34 @@ def main(input, output, robot_ip, match_dataset, match_episode,
 
                     precise_wait(t_sample)
                     # get teleop command
-                    sm_state = sm.get_motion_state_transformed()
-                    # print(sm_state)
+                    # sm_state = sm.get_motion_state_transformed()
+                    pygame.event.pump()
+                    joypos = np.array([joystick.get_axis(3), -joystick.get_axis(0), joystick.get_axis(1)])
+                    joyrot = np.array([0,0,0])
+                    sm_state = np.concatenate([joypos, joyrot])
+
+                    print(sm_state)
                     dpos = sm_state[:3] * (env.max_pos_speed / frequency)
                     drot_xyz = sm_state[3:] * (env.max_rot_speed / frequency)
   
-                    if not sm.is_button_pressed(0):
+                    # if not sm.is_button_pressed(0):
+                    if joystick.get_button(0) == 0:
                         # translation mode
                         drot_xyz[:] = 0
                     else:
                         dpos[:] = 0
-                    if not sm.is_button_pressed(1):
+                    # if not sm.is_button_pressed(1):
+                    if joystick.get_button(1) == 0:
                         # 2D translation mode
-                        dpos[2] = 0    
+                        dpos[0] = 0
 
                     drot = st.Rotation.from_euler('xyz', drot_xyz)
                     target_pose[:3] += dpos
                     target_pose[3:] = (drot * st.Rotation.from_rotvec(
                         target_pose[3:])).as_rotvec()
+                    
                     # clip target pose
-                    target_pose[:2] = np.clip(target_pose[:2], [0.25, -0.45], [0.77, 0.40])
+                    # target_pose[:2] = np.clip(target_pose[:2], [0.25, -0.45], [0.77, 0.40])
 
                     # execute teleop command
                     env.exec_actions(
@@ -299,8 +318,11 @@ def main(input, output, robot_ip, match_dataset, match_episode,
                             obs_dict = dict_apply(obs_dict_np, 
                                 lambda x: torch.from_numpy(x).unsqueeze(0).to(device))
                             result = policy.predict_action(obs_dict)
+                            # print(f'Result from policy: {result}')
                             # this action starts from the first obs step
                             action = result['action'][0].detach().to('cpu').numpy()
+                            # print(f'Action from policy: {action}')
+                            # exit()
                             print('Inference latency:', time.time() - s)
                         
                         # convert policy action to env actions
@@ -315,7 +337,7 @@ def main(input, output, robot_ip, match_dataset, match_episode,
                         else:
                             this_target_poses = np.zeros((len(action), len(target_pose)), dtype=np.float64)
                             this_target_poses[:] = target_pose
-                            this_target_poses[:,[0,1]] = action
+                            this_target_poses[:,[1,2]] = action[:,[1,2]]
 
                         # deal with timing
                         # the same step actions are always the target for
@@ -337,8 +359,8 @@ def main(input, output, robot_ip, match_dataset, match_episode,
                             action_timestamps = action_timestamps[is_new]
 
                         # clip actions
-                        this_target_poses[:,:2] = np.clip(
-                            this_target_poses[:,:2], [0.25, -0.45], [0.77, 0.40])
+                        # this_target_poses[:,:2] = np.clip(
+                        #     this_target_poses[:,:2], [0.25, -0.45], [0.77, 0.40])
 
                         # execute actions
                         env.exec_actions(

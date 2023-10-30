@@ -305,7 +305,7 @@ class SingleRealsense(mp.Process):
 
             # report global time
             # https://github.com/IntelRealSense/librealsense/pull/3909
-            d = pipeline_profile.get_device().first_color_sensor()
+            d = pipeline.get_active_profile().get_device().query_sensors()[0]
             d.set_option(rs.option.global_time_enabled, 1)
 
             # setup advanced mode
@@ -442,13 +442,13 @@ class SingleRealsense(mp.Process):
                         command[key] = value[i]
                     cmd = command['cmd']
                     if cmd == Command.SET_COLOR_OPTION.value:
-                        sensor = pipeline_profile.get_device().first_color_sensor()
+                        sensor = pipeline.get_active_profile().get_device().query_sensors()[0]
                         option = rs.option(command['option_enum'])
                         value = float(command['option_value'])
                         sensor.set_option(option, value)
-                        # print('auto', sensor.get_option(rs.option.enable_auto_exposure))
-                        # print('exposure', sensor.get_option(rs.option.exposure))
-                        # print('gain', sensor.get_option(rs.option.gain))
+                        print('auto', sensor.get_option(rs.option.enable_auto_exposure))
+                        print('exposure', sensor.get_option(rs.option.exposure))
+                        print('gain', sensor.get_option(rs.option.gain))
                     elif cmd == Command.SET_DEPTH_OPTION.value:
                         sensor = pipeline_profile.get_device().first_depth_sensor()
                         option = rs.option(command['option_enum'])

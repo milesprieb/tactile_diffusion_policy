@@ -224,12 +224,15 @@ class RTDEInterpolationController(mp.Process):
         rtde_r = RTDEReceiveInterface(hostname=robot_ip)
 
         try:
-            if self.verbose:
-                print(f"[RTDEPositionalController] Connect to robot: {robot_ip}")
+
+            print(f"[RTDEPositionalController] Connect to robot: {robot_ip}")
+            print(rtde_r.getActualTCPPose())
+            rtde_c.setTcp([0,0,0.1,0,np.pi/2,0])
+            print(rtde_r.getActualTCPPose())
 
             # set parameters
-            if self.tcp_offset_pose is not None:
-                rtde_c.setTcp(self.tcp_offset_pose)
+            # if self.tcp_offset_pose is not None:
+            #     rtde_c.setTcp(self.tcp_offset_pose)
             if self.payload_mass is not None:
                 if self.payload_cog is not None:
                     assert rtde_c.setPayload(self.payload_mass, self.payload_cog)
@@ -237,8 +240,8 @@ class RTDEInterpolationController(mp.Process):
                     assert rtde_c.setPayload(self.payload_mass)
             
             # init pose
-            if self.joints_init is not None:
-                assert rtde_c.moveJ(self.joints_init, self.joints_init_speed, 1.4)
+            # if self.joints_init is not None:
+            #     assert rtde_c.moveJ(self.joints_init, self.joints_init_speed, 1.4)
 
             # main loop
             dt = 1. / self.frequency

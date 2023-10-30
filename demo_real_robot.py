@@ -29,18 +29,19 @@ from diffusion_policy.real_world.keystroke_counter import (
     KeystrokeCounter, Key, KeyCode
 )
 
+import pygame
+
 @click.command()
 @click.option('--output', '-o', required=True, help="Directory to save demonstration dataset.")
 @click.option('--robot_ip', '-ri', required=True, help="UR5's IP address e.g. 192.168.0.204")
-@click.option('--vis_camera_idx', default=0, type=int, help="Which RealSense camera to visualize.")
+@click.option('c scs', default=0, type=int, help="Which RealSense camera to visualize.")
 @click.option('--init_joints', '-j', is_flag=True, default=False, help="Whether to initialize robot joint configuration in the beginning.")
-@click.option('--frequency', '-f', default=10, type=float, help="Control frequency in Hz.")
+@click.option('--frequency', '-f', default=30, type=float, help="Control frequency in Hz.")
 @click.option('--command_latency', '-cl', default=0.01, type=float, help="Latency between receiving SapceMouse command to executing on Robot in Sec.")
 def main(output, robot_ip, vis_camera_idx, init_joints, frequency, command_latency):
     dt = 1/frequency
     with SharedMemoryManager() as shm_manager:
         with KeystrokeCounter() as key_counter, \
-            Spacemouse(shm_manager=shm_manager) as sm, \
             RealEnv(
                 output_dir=output, 
                 robot_ip=robot_ip, 
@@ -58,10 +59,19 @@ def main(output, robot_ip, vis_camera_idx, init_joints, frequency, command_laten
             ) as env:
             cv2.setNumThreads(1)
 
+            pygame.init()
+            pygame.joystick.init()
+            joystick_count = pygame.joystick.get_count()
+            if joystick_count == 0:
+                print("No joystick found.")
+                return
+            joystick = pygame.joystick.Joystick(0)
+            joystick.init()
+
             # realsense exposure
-            env.realsense.set_exposure(exposure=120, gain=0)
+            env.realsense.set_exposure(exposure=14500.0, gain=16.0)
             # realsense white balance
-            env.realsense.set_white_balance(white_balance=5900)
+            env.realsense.set_white_balance(white_balance=3790)
 
             time.sleep(1.0)
             print('Ready!')
@@ -128,24 +138,34 @@ def main(output, robot_ip, vis_camera_idx, init_joints, frequency, command_laten
 
                 precise_wait(t_sample)
                 # get teleop command
-                sm_state = sm.get_motion_state_transformed()
+                # sm_state = sm.get_motion_state_transformed()
+                pygame.event.pump()
+                joypos = np.array([joystick.get_axis(3), -joystick.get_axis(0), joystick.get_axis(1)])
+                # print(joypos)
+                # if(np.linalg.norm(joypos) < 0.1):
+                #     joypos = np.array([0,0,0])
+                    
+                joyrot = np.array([0,0,0])
+                sm_state = np.concatenate([joypos, joyrot])
                 # print(sm_state)
                 dpos = sm_state[:3] * (env.max_pos_speed / frequency)
                 drot_xyz = sm_state[3:] * (env.max_rot_speed / frequency)
                 
-                if not sm.is_button_pressed(0):
+                if joystick.get_button(0) == 0:
                     # translation mode
                     drot_xyz[:] = 0
                 else:
                     dpos[:] = 0
-                if not sm.is_button_pressed(1):
+                if joystick.get_button(1) == 0:
                     # 2D translation mode
-                    dpos[2] = 0    
+                    dpos[0] = 0    
 
                 drot = st.Rotation.from_euler('xyz', drot_xyz)
                 target_pose[:3] += dpos
                 target_pose[3:] = (drot * st.Rotation.from_rotvec(
                     target_pose[3:])).as_rotvec()
+                
+                # print(target_pose)
 
                 # execute teleop command
                 env.exec_actions(

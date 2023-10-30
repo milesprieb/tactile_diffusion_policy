@@ -158,13 +158,13 @@ class RealEnv:
         robot = RTDEInterpolationController(
             shm_manager=shm_manager,
             robot_ip=robot_ip,
-            frequency=125, # UR5 CB3 RTDE
+            frequency=500, # UR5 CB3 RTDE
             lookahead_time=0.1,
             gain=300,
             max_pos_speed=max_pos_speed*cube_diag,
             max_rot_speed=max_rot_speed*cube_diag,
             launch_timeout=3,
-            tcp_offset_pose=[0,0,tcp_offset,0,0,0],
+            tcp_offset_pose=[0,0,0.1,0,np.pi/2,0],
             payload_mass=None,
             payload_cog=None,
             joints_init=j_init,
