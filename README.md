@@ -11,11 +11,9 @@ $ mamba env create -f conda_environment.yaml
 ### 🦾 Real Robot
 Hardware (for Push-T):
 * 1x [UR5-CB3](https://www.universal-robots.com/cb3) or [UR5e](https://www.universal-robots.com/products/ur5-robot/) ([RTDE Interface](https://www.universal-robots.com/articles/ur/interface-communication/real-time-data-exchange-rtde-guide/) is required)
-* 2x [RealSense D415](https://www.intelrealsense.com/depth-camera-d415/)
-* 1x [3Dconnexion SpaceMouse](https://3dconnexion.com/us/product/spacemouse-wireless/) (for teleop)
-* 1x [Millibar Robotics Manual Tool Changer](https://www.millibar.com/manual-tool-changer/) (only need robot side)
-* 1x 3D printed [End effector](https://cad.onshape.com/documents/a818888644a15afa6cc68ee5/w/2885b48b018cda84f425beca/e/3e8771c2124cee024edd2fed?renderMode=0&uiState=63ffcba6631ca919895e64e5)
-* 1x 3D printed [T-block](https://cad.onshape.com/documents/f1140134e38f6ed6902648d5/w/a78cf81827600e4ff4058d03/e/f35f57fb7589f72e05c76caf?renderMode=0&uiState=63ffcbc9af4a881b344898ee)
+* 3x [RealSense D415](https://www.intelrealsense.com/depth-camera-d415/)
+* 1x [Logitech G Extreme 3D Pro USB Joystick](https://www.amazon.com/Logitech-Joystick-Programmable-Weighted-Rapid-fire/dp/B00009OY9U/ref=asc_df_B00009OY9U/?tag=hyprod-20&linkCode=df0&hvadid=242012519199&hvpos=&hvnetw=g&hvrand=1666474163676415662&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9019441&hvtargid=pla-365326647739&psc=1&gclid=Cj0KCQiA1rSsBhDHARIsANB4EJaqZl_H8igbs-2wDNgmndHWV_a9kwj_EeAIol2Iv7u5K-dc1BBdhgoaAtmkEALw_wcB) (for teleop)
+* 2x Soft Bubble Grippers
 * USB-C cables and screws for RealSense
 
 Software:
@@ -23,8 +21,6 @@ Software:
 * Mujoco dependencies: 
 `sudo apt install libosmesa6-dev libgl1-mesa-glx libglfw3 patchelf`
 * [RealSense SDK](https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md)
-* Spacemouse dependencies: 
-`sudo apt install libspnav-dev spacenavd; sudo systemctl start spacenavd`
 * Conda environment `mamba env create -f conda_environment_real.yaml`
 
 ## 🦾 Demo, Training and Eval on a Real Robot
