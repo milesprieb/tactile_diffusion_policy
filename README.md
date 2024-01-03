@@ -26,20 +26,20 @@ Make sure your UR5 robot is running and accepting command from its network inter
 
 Start the demonstration collection script. Press "C" to start recording. Use SpaceMouse to move the robot. Press "S" to stop recording. 
 ```console
-(robodiff)[diffusion_policy]$ python demo_real_robot.py -o data/demo_pusht_real --robot_ip 192.168.0.102
+(robodiff)[diffusion_policy]$ python demo_real_robot.py -o data/demo_rotate_bottle --robot_ip 192.168.0.102
 ```
 
-This should result in a demonstration dataset in `data/demo_pusht_real` with in the same structure as our example [Rotate Bottle training dataset](https://drive.google.com/drive/folders/16crkVl_co_ZVIiBG2vHfvlFCGSCfubKa?usp=sharing).
+This should result in a demonstration dataset in `data/demo_rotate_bottle` with in the same structure as our example [Rotate Bottle training dataset](https://drive.google.com/drive/folders/16crkVl_co_ZVIiBG2vHfvlFCGSCfubKa?usp=sharing).
 
 To train a Diffusion Policy, launch training with config:
 ```console
-(robodiff)[diffusion_policy]$ python train.py --config-name=train_diffusion_unet_real_image_workspace task.dataset_path=data/demo_pusht_real
+(robodiff)[diffusion_policy]$ python train.py --config-name=train_diffusion_unet_real_image_workspace task.dataset_path=data/demo_rotate_bottle
 ```
-Edit [`diffusion_policy/config/task/real_pusht_image.yaml`](./diffusion_policy/config/task/real_pusht_image.yaml) if your camera setup is different.
+Edit [`diffusion_policy/config/task/real_pusht_image.yaml`](./diffusion_policy/config/task/rotate_bottle.yaml) if your camera setup is different.
 
 Assuming the training has finished and you have a checkpoint at `data/outputs/blah/checkpoints/latest.ckpt`, launch the evaluation script with:
 ```console
-python eval_real_robot.py -i data/outputs/blah/checkpoints/latest.ckpt -o data/eval_pusht_real --robot_ip 192.168.0.102
+python eval_real_robot.py -i data/outputs/blah/checkpoints/latest.ckpt -o data/eval_rotate_bottle --robot_ip 192.168.0.102
 ```
 Press "C" to start evaluation (handing control over to the policy). Press "S" to stop the current episode.
 
