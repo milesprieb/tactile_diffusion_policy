@@ -12,7 +12,8 @@ $ mamba env create -f conda_environment.yaml
 Hardware (for Rotate Bottle):
 * 1x [UR5-CB3](https://www.universal-robots.com/cb3) or [UR5e](https://www.universal-robots.com/products/ur5-robot/) ([RTDE Interface](https://www.universal-robots.com/articles/ur/interface-communication/real-time-data-exchange-rtde-guide/) is required)
 * 3x [RealSense D415](https://www.intelrealsense.com/depth-camera-d415/)
-* 1x [Spark Teleoperation Arm](https://github.com/RPM-lab-UMN/Spark)
+* 1x [Spark Teleoperation Arm](https://github.com/RPM-lab-UMN/Spark)(for teleop in 6D)
+* 1x [Logitech G Extreme 3D Pro USB Joystick](https://www.amazon.com/Logitech-Joystick-Programmable-Weighted-Rapid-fire/dp/B00009OY9U/ref=asc_df_B00009OY9U/?tag=hyprod-20&linkCode=df0&hvadid=242012519199&hvpos=&hvnetw=g&hvrand=13455296410321615427&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9019667&hvtargid=pla-365326647739&psc=1&gclid=CjwKCAiAqNSsBhAvEiwAn_tmxWpI0FA5F8BWtP9rXqOIj4wvWpt-_XWver9XrMex7w2nhUEnpV4mpRoC0qQQAvD_BwE) (for teleop in 2D)
 * 2x Soft Bubble Grippers
 * USB-C cables and screws for RealSense
 
@@ -24,7 +25,7 @@ Software:
 ## 🦾 Demo, Training and Eval on a Real Robot
 Make sure your UR5 robot is running and accepting command from its network interface (emergency stop button within reach at all time), your RealSense cameras plugged in to your workstation (tested with `realsense-viewer`).
 
-Start the demonstration collection script. Press "C" to start recording. Use SpaceMouse to move the robot. Press "S" to stop recording. 
+Start the demonstration collection script. Press "C" to start recording. Use Spark/Joystick to move the robot. The current codebase is setup to be compatible with the joystick and the axis of movement can be modified wihtin the demo script [here](https://github.com/RPM-lab-UMN/rpm_diffusion_policy/blob/1fc17214a7b2d3d4d646cb388aa9e044740e05b9/demo_real_robot.py#L143C103-L143C103). Press "S" to stop recording. 
 ```console
 (robodiff)[diffusion_policy]$ python demo_real_robot.py -o data/demo_rotate_bottle --robot_ip 192.168.0.102
 ```
